@@ -1,0 +1,41 @@
+import pandas as pd
+
+df = pd.read_csv('https://github.com/edyoda/data-science-complete-tutorial/blob/master/Data/house_rental_data.csv.txt')
+
+df.drop('house_id', axis=1, inplace=True)
+
+df.fillna(df.mean(), inplace=True)
+
+from sklearn.preprocessing import StandardScaler
+
+scaler = StandardScaler()
+scaled_features = scaler.fit_transform(df)
+
+df_scaled = pd.DataFrame(scaled_features, columns=df.columns)
+
+from sklearn.cluster import KMeans
+import matplotlib.pyplot as plt
+
+inertia_values = []
+k_values = range(1, 11)  # K values from 1 to 10
+
+for k in k_values:
+    kmeans = KMeans(n_clusters=k, random_state=42)
+    kmeans.fit(df_scaled)
+    inertia_values.append(kmeans.inertia_)
+
+plt.plot(k_values, inertia_values, marker='o')
+plt.xlabel('Number of Clusters (K)')
+plt.ylabel('Inertia')
+plt.title('K-means: Inertia vs. Number of Clusters (K)')
+plt.show()
+
+# Assuming the optimal K value is determined as 'optimal_k'
+
+# Perform K-means clustering with the optimal K value
+kmeans = KMeans(n_clusters=optimal_k, random_state=42)
+clusters = kmeans.fit_predict(df_scaled)
+
+df['cluster'] = clusters
+
+df.to_csv('house_data_with_clusters.csv', index=False)
